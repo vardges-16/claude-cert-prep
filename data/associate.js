@@ -5,18 +5,26 @@ const DOMAINS_ASSOC = [
   sections:[
     {h:"What makes a prompt effective",
      p:["A vague prompt gets a vague answer. 'Write something about our Q3 numbers' could produce almost anything — a summary, a chart description, a celebratory email, a critical analysis. An effective prompt states the GOAL clearly, gives Claude the CONTEXT it needs (the actual numbers, who the audience is, what decision this feeds into), and specifies the FORMAT you want back (a one-page memo, three bullet points, a table).",
-        "Being specific isn't about writing a huge wall of text — it's about removing the guesswork. 'Summarize Q3 revenue trends for the exec team in 3 bullet points, focusing on what changed vs. Q2' is short but leaves nothing to guess at."],
+        "Being specific isn't about writing a huge wall of text — it's about removing the guesswork. 'Summarize Q3 revenue trends for the exec team in 3 bullet points, focusing on what changed vs. Q2' is short but leaves nothing to guess at.",
+        "**Real Example:** Instead of 'Analyze our sales data,' try 'Analyze Q3 sales data (attached: q3_sales.csv) and identify the top 3 revenue drivers for the CFO's board presentation, formatted as a table with driver name, impact amount, and one supporting fact for each.'"],
      why:"The exam tests whether you can spot WHY a prompt failed — usually it's a missing piece: no stated audience, no format, no success criteria — rather than assuming the model 'just isn't good enough' at the task."},
     {h:"Task decomposition — breaking a big ask into steps",
      p:["Complex requests ('build me a go-to-market plan for this product') go better when broken into a SEQUENCE of smaller, focused asks rather than one giant prompt trying to do everything at once: first research the market, then identify the audience segments, then draft messaging, then assemble the plan.",
-        "Decomposition also helps you catch problems early — if step 2 (audience segments) comes back wrong, you fix that before building steps 3 and 4 on top of a flawed foundation, rather than discovering the whole thing needs a redo at the end."],
+        "Decomposition also helps you catch problems early — if step 2 (audience segments) comes back wrong, you fix that before building steps 3 and 4 on top of a flawed foundation, rather than discovering the whole thing needs a redo at the end.",
+        "**When to decompose:** Use this for anything that would naturally require multiple phases of work if a human were doing it — research → planning → drafting → review. For simple, single-step tasks, decomposition adds unnecessary overhead."],
      why:"This mirrors how a competent person would tackle the same task themselves — nobody writes a 10-page strategy document in one continuous pass without checking their assumptions along the way."},
     {h:"Iterating on a prompt to improve output quality",
      p:["The first response you get is rarely the final one. If the output is close but not quite right, the fastest fix is usually NOT rewriting the whole prompt from scratch — it's giving specific, targeted feedback: 'make this more concise,' 'the tone is too casual for a board audience,' 'add a section on risks.'",
-        "If Claude keeps misunderstanding the SAME thing across multiple attempts, that's a sign the original instruction was ambiguous, and it's worth showing a concrete example of what you want rather than describing it abstractly again."],
+        "If Claude keeps misunderstanding the SAME thing across multiple attempts, that's a sign the original instruction was ambiguous, and it's worth showing a concrete example of what you want rather than describing it abstractly again.",
+        "**Iteration anti-pattern:** Don't say 'this isn't quite right' and expect improvement without specifying what to change. Always be specific: 'the summary is good but add analysis of competitor response' is actionable; 'this needs to be better' is not."],
      why:"An example of the exact output you want ('like this: ...') is often far more effective than a longer verbal description of what 'good' looks like, especially for formatting or tone requests."},
     {h:"Adapting your approach by task type",
-     p:["Different kinds of work call for different prompting styles. For ANALYSIS tasks (interpreting data, comparing options), ask for the reasoning behind conclusions, not just the conclusion itself. For RESEARCH tasks, be explicit about how current the information needs to be and whether sources should be cited. For DRAFTING tasks (emails, reports), give tone and audience upfront. For BRAINSTORMING, explicitly ask for a WIDE range of options rather than the single 'best' one, since a narrow prompt tends to produce a narrow, safe answer."],
+     p:["Different kinds of work call for different prompting styles. For ANALYSIS tasks (interpreting data, comparing options), ask for the reasoning behind conclusions, not just the conclusion itself. For RESEARCH tasks, be explicit about how current the information needs to be and whether sources should be cited. For DRAFTING tasks (emails, reports), give tone and audience upfront. For BRAINSTORMING, explicitly ask for a WIDE range of options rather than the single 'best' one, since a narrow prompt tends to produce a narrow, safe answer.",
+        "**Task-type matching examples:**",
+        "• Analysis: 'Analyze these quarterly results and explain WHICH METRICS shifted most and WHY'",
+        "• Research: 'Research recent changes to GDPR enforcement, citing current sources, focusing on 2025-2026 implications'",
+        "• Drafting: 'Draft a professional but warm welcome email for new customers, assume they're non-technical'",
+        "• Brainstorming: 'Generate at least 10 different marketing angles for a productivity app targeting students'"],
      why:"Recognizing which MODE a task falls into — before you even start typing — shapes what information you need to include upfront, and mismatching the mode to the prompt style is a common, avoidable source of unsatisfying output."}
   ],
   quiz:[
@@ -37,7 +45,10 @@ const DOMAINS_ASSOC = [
      correct:1, explain:"Brainstorming benefits from breadth — asking for the single best option upfront defeats the purpose of exploring the range of possibilities first."},
     {q:"For a RESEARCH-type task, what's an important detail to specify upfront that isn't as critical for a drafting task?",
      opts:["The font size of the final output","How current the information needs to be, and whether sources/citations are expected","The user's favorite color","Nothing — research and drafting tasks need identical prompts"],
-     correct:1, explain:"Research tasks have specific needs around recency and sourcing that a drafting task (like writing an email) typically doesn't share."}
+     correct:1, explain:"Research tasks have specific needs around recency and sourcing that a drafting task (like writing an email) typically doesn't share."},
+    {q:"You're creating a prompt to get market analysis for a new product. What should you include FIRST before asking for analysis?",
+     opts:["The color scheme for the final report","The specific GOAL (what decision this analysis feeds), the AUDIENCE (who reads it), and the FORMAT (document, slide, summary)","A list of all competitors worldwide regardless of relevance","Only the product name with no other context"],
+     correct:1, explain:"Goal, audience, and format are the foundational specifics that let Claude aim at the right target; without them, you get a generic answer that might not fit your actual need."}
   ]
 },
 {
@@ -46,23 +57,29 @@ const DOMAINS_ASSOC = [
   sections:[
     {h:"Confident-sounding answers are not the same as correct answers",
      p:["A model can produce a fluent, specific-sounding claim — a citation, a statistic, a subsection number — that is simply invented. This is called a HALLUCINATION, and the danger is precisely that it doesn't LOOK uncertain; it reads exactly like a correct answer would.",
-        "The practical rule: any SPECIFIC, checkable claim (a number, a date, a citation, a named source) that's going to be used in something consequential — a compliance summary, a client deliverable, a decision — should be verified against the actual source before it goes out, regardless of how confident the phrasing sounds."],
+        "The practical rule: any SPECIFIC, checkable claim (a number, a date, a citation, a named source) that's going to be used in something consequential — a compliance summary, a client deliverable, a decision — should be verified against the actual source before it goes out, regardless of how confident the phrasing sounds.",
+        "**Hallucination red flags:** Suspiciously specific citations ('Section 4.2.3.1'), exact dollar amounts without sources, named statistics that sound plausible but aren't familiar, or dates that are conveniently exact."],
      why:"This is the exam's single most emphasized idea. Confidence in TONE tells you nothing about accuracy — verifying specific claims is a habit, not an occasional extra step for suspicious-looking answers."},
     {h:"Fact-checking and validation techniques",
      p:["When a claim needs checking, go to the SOURCE — the actual document, dataset, or webpage — rather than asking the model to re-confirm its own answer, since a model re-asked the same question tends to repeat the same mistake with the same confidence.",
-        "For numerical claims specifically, do the arithmetic yourself or in a spreadsheet rather than trusting a stated total, especially when multiple individual figures are supposed to sum to it."],
+        "For numerical claims specifically, do the arithmetic yourself or in a spreadsheet rather than trusting a stated total, especially when multiple individual figures are supposed to sum to it.",
+        "**Validation workflow:** Original claim → Source document (don't ask Claude to re-confirm) → Your independent verification → Safe to share"],
      why:"Asking the SAME model to grade its own work has an obvious blind spot — it's the same reasoning that produced the error in the first place, so it's unlikely to catch it on a second look without new information."},
     {h:"Recognizing bias and inconsistency in outputs",
-     p:["Beyond outright factual errors, watch for outputs that consistently favor one interpretation, skip inconvenient counter-evidence, or produce different conclusions when the same underlying question is asked with slightly different framing. None of these are 'lies' in the way a hallucination is — they're subtler consistency and balance problems worth a second read specifically for that."],
+     p:["Beyond outright factual errors, watch for outputs that consistently favor one interpretation, skip inconvenient counter-evidence, or produce different conclusions when the same underlying question is asked with slightly different framing. None of these are 'lies' in the way a hallucination is — they're subtler consistency and balance problems worth a second read specifically for that.",
+        "**Bias red flags:** One-sided presentations of genuinely two-sided issues, missing major counter-arguments, selective data presentation, or tone that favors one conclusion over another without justification."],
      why:"A one-sided answer to a genuinely two-sided question isn't wrong the way a fabricated statistic is wrong, but it's still a quality problem worth catching before it reaches a real audience."},
     {h:"When human review or additional verification is required",
-     p:["Not every output needs the same level of scrutiny. A first draft of an internal brainstorming doc can go out with a light look-over. A summary heading to a REGULATORY or COMPLIANCE audience, a number feeding a financial decision, or anything with legal or safety implications needs a genuine verification pass against source material — not just a quick read for tone."],
+     p:["Not every output needs the same level of scrutiny. A first draft of an internal brainstorming doc can go out with a light look-over. A summary heading to a REGULATORY or COMPLIANCE audience, a number feeding a financial decision, or anything with legal or safety implications needs a genuine verification pass against source material — not just a quick read for tone.",
+        "**Scrutiny scale:** High-stakes (regulatory, financial, legal, safety) = thorough source verification. Medium-stakes (shared with external partners) = accuracy check + tone review. Low-stakes (internal draft, brainstorm) = quick consistency read."],
      why:"Matching the LEVEL of scrutiny to the STAKES of the output is itself a tested skill — over-checking a low-stakes draft wastes time, and under-checking a high-stakes one is where real damage happens."},
     {h:"Editing and adapting outputs for the intended audience",
-     p:["The same underlying content often needs a genuinely different SHAPE depending on who's reading it — an executive summary for leadership, a detailed technical breakdown for the team actually doing the work, a plain-language version for an external customer. Adapting isn't just shortening; it's changing what's emphasized, what jargon is assumed, and what level of detail is appropriate."],
+     p:["The same underlying content often needs a genuinely different SHAPE depending on who's reading it — an executive summary for leadership (key takeaways only), a detailed technical breakdown for the team actually doing the work (step-by-step reasoning), a plain-language version for an external customer (no jargon). Adapting isn't just shortening; it's changing what's emphasized, what jargon is assumed, and what level of detail is appropriate.",
+        "**Adaptation dimensions:** Length, technical depth, emphasis/priority, tone (formal vs. conversational), examples used, and level of justification needed"],
      why:"A technically accurate output can still fail its purpose if it's pitched at the wrong audience — this is a genuinely distinct skill from checking whether the CONTENT itself is correct."},
     {h:"Choosing the right output format",
-     p:["Claude can return content as inline conversational text, as a saved ARTIFACT (a standalone document, spreadsheet, or piece of code meant to be reused or edited further), or as STRUCTURED DATA (a table, a list with consistent fields) depending on what the content will be used for next. A one-off answer to a quick question fits inline text; a document meant to be shared, edited, or referenced later fits an artifact; data meant to be sorted, filtered, or fed into another tool fits a structured format."],
+     p:["Claude can return content as inline conversational text, as a saved ARTIFACT (a standalone document, spreadsheet, or piece of code meant to be reused or edited further), or as STRUCTURED DATA (a table, a list with consistent fields) depending on what the content will be used for next. A one-off answer to a quick question fits inline text; a document meant to be shared, edited, or referenced later fits an artifact; data meant to be sorted, filtered, or fed into another tool fits a structured format.",
+        "**Format matching:** Inline = answering in the moment. Artifact = something they'll keep, edit, share. Structured data = something they'll analyze, filter, or process further."],
      why:"Choosing the WRONG format creates real friction downstream — a long report buried in chat history is hard to find and share later, while a quick answer needlessly turned into a formal document is overkill."}
   ],
   quiz:[
@@ -86,7 +103,10 @@ const DOMAINS_ASSOC = [
      correct:1, explain:"Content meant to be revisited, edited, and shared over time fits the artifact format — a quick inline answer to a one-off question doesn't serve that ongoing-reference need."},
     {q:"What's a bias/consistency problem distinct from an outright factual hallucination?",
      opts:["There's no meaningful distinction — all output quality issues are the same category","An output that consistently favors one interpretation or skips inconvenient counter-evidence on a genuinely two-sided question — this isn't a fabricated fact, but still a quality problem worth a dedicated check","Any answer shorter than expected","Any answer written in a formal tone"],
-     correct:1, explain:"One-sidedness on a genuinely balanced question is a distinct failure mode from fabricating a specific fact — both are worth checking for, but they're not the same problem."}
+     correct:1, explain:"One-sidedness on a genuinely balanced question is a distinct failure mode from fabricating a specific fact — both are worth checking for, but they're not the same problem."},
+    {q:"A financial report generated by Claude needs to be shared with your CFO before a board meeting in 2 hours. It contains revenue projections, expense allocations, and growth assumptions. What's your verification approach?",
+     opts:["Send it as-is since it's urgent and waiting will miss the deadline","Spot-check the math yourself, verify key assumptions against source data, and if anything looks wrong or unfamiliar, verify against the actual source before submitting — this is high-stakes financial output","Quickly skim for typos and tone, that's sufficient for a board document","Ask Claude to re-run the analysis to be sure, then share whatever comes back"],
+     correct:1, explain:"High-stakes financial decisions require actual source verification of numbers and assumptions, not just re-running the same prompt, even under time pressure."}
   ]
 },
 {
@@ -94,14 +114,29 @@ const DOMAINS_ASSOC = [
   intro:"Claude comes in different model tiers and different product surfaces (Projects, chat, research mode, artifacts). Picking the right combination for a given task — balancing quality, speed, and cost — is a core judgment call this domain tests.",
   sections:[
     {h:"Claude's model tiers, at a glance",
-     p:["Claude models come in different tiers, generally trading off CAPABILITY against SPEED and COST. A smaller, faster tier (Haiku) suits high-volume, straightforward tasks where speed and low cost matter more than deep reasoning — like drafting many short, similar customer replies. A mid-tier model (Sonnet) is the balanced, general-purpose default for most everyday work. The most capable tier (Opus) suits the hardest reasoning tasks, where getting the answer right matters far more than speed or cost."],
+     p:["Claude models come in different tiers, generally trading off CAPABILITY against SPEED and COST. A smaller, faster tier (Haiku) suits high-volume, straightforward tasks where speed and low cost matter more than deep reasoning — like drafting many short, similar customer replies. A mid-tier model (Sonnet) is the balanced, general-purpose default for most everyday work. The most capable tier (Opus) suits the hardest reasoning tasks, where getting the answer right matters far more than speed or cost.",
+        "**Tier selection guide:**",
+        "• Haiku (fast, cheap, simple tasks): customer support drafts, summarization, categorization, high-volume routine work",
+        "• Sonnet (balanced default): most business tasks, content creation, moderate reasoning, day-to-day work",
+        "• Opus (most capable, slower, pricier): complex reasoning, strategy, novel problem-solving, anything that would be expensive to get wrong"],
      why:"Always defaulting to the most capable (and most expensive) tier for every task, regardless of how simple that task actually is, wastes both money and time — the tested skill is matching tier to the actual difficulty of the work, not defaulting to 'biggest is always best.'"},
     {h:"Choosing the right product feature for the task",
-     p:["Claude is available through several different surfaces suited to different needs: a standard CHAT conversation for a quick, one-off question; a PROJECT for ongoing work that benefits from persistent instructions and a shared set of reference documents; a RESEARCH mode for tasks that need broader, more thorough information-gathering across many sources; and ARTIFACTS for content meant to be created, edited, and reused as a standalone document."],
+     p:["Claude is available through several different surfaces suited to different needs: a standard CHAT conversation for a quick, one-off question; a PROJECT for ongoing work that benefits from persistent instructions and a shared set of reference documents; a RESEARCH mode for tasks that need broader, more thorough information-gathering across many sources; and ARTIFACTS for content meant to be created, edited, and reused as a standalone document.",
+        "**Product feature matching:**",
+        "• Chat (quick, stateless): answering a one-off question, brainstorming session, quick help",
+        "• Projects (persistent context): ongoing work with standing instructions, reference materials across multiple sessions",
+        "• Research mode (broader investigation): news, market trends, thorough research where breadth matters more than speed",
+        "• Artifacts (reusable content): documents to edit, code to run, reports to iterate on"],
      why:"Picking the wrong surface for a task creates friction — running a quick one-off question through a heavyweight research mode wastes time, while trying to do sustained, recurring work in a single throwaway chat loses the benefit of persistent context a Project would provide."},
+    {h:"When to use Research Mode",
+     p:["Research mode is specifically designed for questions where you need BROAD, THOROUGH information-gathering across many sources rather than a quick answer from the model's training data. It uses extended reasoning and browses multiple sources to answer your question more comprehensively.",
+        "**Use research mode when:** You need current events/news (recent information beyond training data), broad market/competitive landscape analysis, thorough background research, comparing many options/alternatives, or when you need citations and source tracking.",
+        "**Don't use research mode for:** Quick facts, simple summaries, drafting tasks, anything time-sensitive where speed matters more than breadth."],
+     why:"Research mode is more expensive (in cost and time) than standard chat, so it's worth using only when the BREADTH of information or currency of sources actually matters for your goal."},
     {h:"Managing context and memory across a long session",
      p:["A single conversation has a limited amount of 'working memory' — as it gets very long, earlier details can become harder for the model to weigh appropriately alongside more recent messages. When a conversation has drifted far from its original topic, or has grown very long, it's often more effective to SUMMARIZE the key points and START A NEW conversation with that summary, rather than continuing to pile more onto an already very long one.",
-        "For ongoing work across multiple sessions, persisting the important context (in a Project's knowledge base, or in a written summary you bring back) is more reliable than expecting one continuous conversation to hold everything indefinitely."],
+        "For ongoing work across multiple sessions, persisting the important context (in a Project's knowledge base, or in a written summary you bring back) is more reliable than expecting one continuous conversation to hold everything indefinitely.",
+        "**Context management best practices:** For ongoing work, use a Project (context persists automatically). For temporary work within one session, restarting with a summary is fine. For long conversations, periodically save key takeaways."],
      why:"Recognizing WHEN a conversation has become unwieldy — and choosing to restart with a clean summary rather than pushing forward — is a practical skill distinct from just knowing that context limits exist in the abstract."}
   ],
   quiz:[
@@ -119,7 +154,10 @@ const DOMAINS_ASSOC = [
      correct:1, explain:"Recognizing when a conversation has become unwieldy and restarting with a clean, deliberate summary is more reliable than expecting one continuous thread to hold everything indefinitely."},
     {q:"For a task that requires broad, thorough information-gathering across many sources, which product feature is most appropriate?",
      opts:["A quick standard chat message with no special mode","Research mode, which is built for broader, more thorough information-gathering than a standard quick chat exchange","Artifacts, since they are the feature for gathering source material","None of the product features are relevant to this need"],
-     correct:1, explain:"Matching the feature to the task means using research mode specifically when the work calls for wide-ranging investigation, not a quick one-off exchange."}
+     correct:1, explain:"Matching the feature to the task means using research mode specifically when the work calls for wide-ranging investigation, not a quick one-off exchange."},
+    {q:"When is Research Mode worth the additional time and cost compared to standard chat?",
+     opts:["Research mode should always be used for maximum quality","Use research mode when you need BROAD information-gathering, current events beyond training data, or thorough background research where breadth matters more than speed","Research mode is never worth using since standard chat is always faster","Research mode can only be used for very technical topics"],
+     correct:1, explain:"Research mode is a premium feature worth using specifically when the need for breadth, recency, or source tracking justifies the cost and latency — not for every question."}
   ]
 },
 {
@@ -127,16 +165,21 @@ const DOMAINS_ASSOC = [
   intro:"Using Claude well isn't just about individual prompts — it's about finding where Claude fits into a broader process, designing how it should be used there, and explaining that clearly to the people affected by the change.",
   sections:[
     {h:"Using Claude to analyze requirements and use cases",
-     p:["Before integrating Claude into any workflow, the first step is genuinely understanding the CURRENT process — what steps exist, where the bottlenecks are, what decisions get made and by whom — rather than jumping straight to 'let's add AI here.' Claude itself can help with this analysis: describing the current process and asking Claude to help identify where the actual friction points are is a legitimate and effective use of the tool."],
+     p:["Before integrating Claude into any workflow, the first step is genuinely understanding the CURRENT process — what steps exist, where the bottlenecks are, what decisions get made and by whom — rather than jumping straight to 'let's add AI here.' Claude itself can help with this analysis: describing the current process and asking Claude to help identify where the actual friction points are is a legitimate and effective use of the tool.",
+        "**Analysis questions to ask:** What steps take the most time? Where do errors happen? What requires human judgment? Where is there rework or back-and-forth? Where do people get stuck?"],
      why:"Applying Claude to a poorly-understood process risks automating the WRONG step, or missing the step that was actually the real bottleneck — understanding the process first is what makes the eventual integration actually useful."},
     {h:"Using Claude for research, planning, and process optimization",
-     p:["Beyond individual tasks, Claude can support higher-level work: researching options before a decision, drafting and comparing different planning approaches, or identifying where an existing process has unnecessary steps or redundant handoffs. This is a genuinely different use than 'write me this one document' — it's using Claude as a thinking partner across an ongoing initiative."],
+     p:["Beyond individual tasks, Claude can support higher-level work: researching options before a decision, drafting and comparing different planning approaches, or identifying where an existing process has unnecessary steps or redundant handoffs. This is a genuinely different use than 'write me this one document' — it's using Claude as a thinking partner across an ongoing initiative.",
+        "**Planning use cases:** Multi-option comparison, scenario planning, identifying process inefficiencies, competitive research, strategic brainstorming, workflow redesign ideation"],
      why:"Recognizing this broader planning/optimization use case, distinct from single-task drafting, is part of what separates basic prompting skill from the workflow-integration judgment this domain actually tests."},
     {h:"Integrating Claude into an existing workflow",
-     p:["Integration can mean AUGMENTING an existing process (Claude drafts a first pass that a human still reviews and finalizes) or genuinely REDESIGNING the process around what Claude now makes possible (a task that used to require three people and two days might now be one person and two hours, but only if the surrounding process — approvals, handoffs, checkpoints — is actually redesigned to match, not just bolted on)."],
+     p:["Integration can mean AUGMENTING an existing process (Claude drafts a first pass that a human still reviews and finalizes) or genuinely REDESIGNING the process around what Claude now makes possible (a task that used to require three people and two days might now be one person and two hours, but only if the surrounding process — approvals, handoffs, checkpoints — is actually redesigned to match, not just bolted on).",
+        "**Augmentation:** Add Claude step into existing workflow (human still does everything else). Benefit: modest improvement.",
+        "**Redesign:** Restructure entire workflow around what Claude enables. Benefit: much larger efficiency gains, but requires more planning."],
      why:"Simply inserting Claude into an unchanged process often captures only a fraction of the available benefit — genuine redesign, where warranted, unlocks more than augmentation alone."},
     {h:"Communicating Claude's value and limitations to stakeholders",
-     p:["Part of this role is explaining to non-technical stakeholders — clearly and honestly — both what Claude can help with and where its limitations are (it can produce plausible-sounding but incorrect specifics; it doesn't have live access to internal systems unless specifically connected; it needs human judgment for genuinely ambiguous or high-stakes calls). Overselling capability erodes trust the first time a limitation shows up unexpectedly; a clear-eyed explanation upfront sets the right expectations."],
+     p:["Part of this role is explaining to non-technical stakeholders — clearly and honestly — both what Claude can help with and where its limitations are (it can produce plausible-sounding but incorrect specifics; it doesn't have live access to internal systems unless specifically connected; it needs human judgment for genuinely ambiguous or high-stakes calls). Overselling capability erodes trust the first time a limitation shows up unexpectedly; a clear-eyed explanation upfront sets the right expectations.",
+        "**Communication template:** 'Claude can help us [specific benefit], which means [concrete outcome]. Where we still need human judgment is [specific limitations].'"],
      why:"This is explicitly part of the associate role's job description: bridging the gap between what Claude can do and what stakeholders assume it can do, honestly and clearly, rather than either overselling or underselling."}
   ],
   quiz:[
@@ -151,7 +194,16 @@ const DOMAINS_ASSOC = [
      correct:1, explain:"Honest communication about both value and limitations is explicitly part of the role — it prevents a damaging surprise the first time a real limitation is encountered in practice."},
     {q:"Using Claude to help identify where an existing process has redundant handoffs or unnecessary steps is an example of which kind of use?",
      opts:["This isn't a legitimate use case for Claude","Process optimization and planning support — a broader, ongoing-initiative use distinct from drafting a single one-off document","Only artifacts can be used for this kind of task","This use case falls entirely outside the associate certification's scope"],
-     correct:1, explain:"Using Claude as a thinking partner for process-level analysis is a distinct, legitimate use case from single-task drafting, and is explicitly part of this domain's scope."}
+     correct:1, explain:"Using Claude as a thinking partner for process-level analysis is a distinct, legitimate use case from single-task drafting, and is explicitly part of this domain's scope."},
+    {q:"A manager wants to automate customer complaint handling. You recommend understanding the current process first. What specific bottlenecks should you investigate?",
+     opts:["Only the total complaint volume, nothing else matters","What steps take the most time, where errors happen, which steps require judgment calls, where there's rework, and where people get stuck — each has different Claude applicability","The color of the complaint forms, that's the main issue","You should skip analysis and just add Claude to all steps equally"],
+     correct:1, explain:"Bottleneck identification tells you which steps actually need help, not just which ones LOOK automatable — understanding what's broken guides where Claude adds the most value."},
+    {q:"After integrating Claude, your manager notices productivity barely improved despite Claude doing part of the work. What might have happened?",
+     opts:["Claude is always ineffective regardless of implementation","The integration was likely only AUGMENTED (Claude added as a step, but surrounding process unchanged) rather than REDESIGNED to match what Claude now makes possible — bottlenecks in other steps still slow everything down","There's no such thing as a failed Claude integration","You should immediately give up on using Claude entirely"],
+     correct:1, explain:"Simple augmentation often leaves other bottlenecks in place; without process redesign, surrounding inefficiencies still drag down the overall result even if Claude does its part well."},
+    {q:"Which of these is an honest, balanced way to explain Claude's value to non-technical stakeholders?",
+     opts:["Claude can fix every problem we have, trust me","Claude can help us [specific task — drafting, analyzing, categorizing], which means [concrete outcome like 40% faster turnaround]. Where we still need human judgment is [specific high-stakes or ambiguous calls]","Claude is too risky and we shouldn't use it at all","Claude's limitations are irrelevant because it's artificial intelligence"],
+     correct:1, explain:"Clear communication about both capability AND limitations is what sets realistic expectations and builds trust — neither overselling nor underselling."}
   ]
 },
 {
@@ -160,16 +212,21 @@ const DOMAINS_ASSOC = [
   sections:[
     {h:"Configuring a Project with instructions and knowledge sources",
      p:["A Project lets you set PERSISTENT instructions (how Claude should behave for everything in this Project — tone, format preferences, standing context about the team or business) and attach KNOWLEDGE SOURCES (documents, reference material) that Claude can draw on for every conversation within that Project, without you having to re-paste them each time.",
-        "Good project instructions are specific and durable — 'always format financial figures with two decimal places and the currency symbol' is useful and stable; 'be helpful' is too vague to change anything."],
+        "Good project instructions are specific and durable — 'always format financial figures with two decimal places and the currency symbol' is useful and stable; 'be helpful' is too vague to change anything.",
+        "**Project setup checklist:** Persistent instructions (standing context that applies to everything), Knowledge sources (reference docs that repeat across conversations), Connectors (live data if needed), Default tone/style"],
      why:"The entire value of a Project over a one-off chat is this persistence — instructions and knowledge that would otherwise need re-explaining in every single conversation are set once and apply consistently going forward."},
     {h:"Managing uploaded knowledge and connectors",
-     p:["Beyond manually uploaded documents, Projects can connect to LIVE external sources — like Google Drive or Gmail — so Claude can reference current information from those systems rather than only a static snapshot uploaded once and never refreshed. Choosing which connectors to enable, and being deliberate about what data those connectors expose, is itself a configuration decision with real consequences."],
+     p:["Beyond manually uploaded documents, Projects can connect to LIVE external sources — like Google Drive or Gmail — so Claude can reference current information from those systems rather than only a static snapshot uploaded once and never refreshed. Choosing which connectors to enable, and being deliberate about what data those connectors expose, is itself a configuration decision with real consequences.",
+        "**Knowledge management considerations:** Uploaded docs are static (must be manually updated). Live connectors stay current (but require access setup). Sensitive data in either needs protection."],
      why:"An outdated uploaded document silently going stale (while everyone assumes it's still current) is a genuine, easy-to-miss failure mode — a live connector avoids this specific problem, at the cost of needing its own access and data-governance consideration."},
     {h:"Writing effective system-level instructions",
-     p:["Instructions set at the Project (or account) level apply broadly across everything done within that scope, so they should focus on things that are genuinely STABLE and widely applicable — house style, standing context about the organization, recurring formatting rules — rather than one-off preferences that only apply to a single task."],
+     p:["Instructions set at the Project (or account) level apply broadly across everything done within that scope, so they should focus on things that are genuinely STABLE and widely applicable — house style, standing context about the organization, recurring formatting rules — rather than one-off preferences that only apply to a single task.",
+        "**Good standing instructions:** 'For all financial summaries, use this currency format', 'Always include this disclaimer for legal content', 'Our team prefers bullet points over paragraphs'",
+        "**Bad standing instructions:** 'For this one report, use red headers', 'Only for this project, use these specific numbers', 'Add this one-time section to everything'"],
      why:"Mixing a one-time, task-specific request into standing project instructions means that instruction keeps firing on EVERY future conversation in that project, even when it no longer applies — a common, avoidable configuration mistake."},
     {h:"Maintaining and updating configurations over time",
-     p:["Project instructions and knowledge sources aren't 'set once and forget' — as the underlying business context changes (a policy update, a new product line, a changed process), the Project's instructions and reference material need to be reviewed and updated to match, or Claude will keep confidently working from outdated assumptions."],
+     p:["Project instructions and knowledge sources aren't 'set once and forget' — as the underlying business context changes (a policy update, a new product line, a changed process), the Project's instructions and reference material need to be reviewed and updated to match, or Claude will keep confidently working from outdated assumptions.",
+        "**Maintenance schedule:** Quarterly review of standing instructions and knowledge sources. Update whenever: policy changes, new guidelines issued, reference materials become outdated, or output quality drops."],
      why:"An unmaintained Project is a specific, recognizable risk: it doesn't fail loudly, it just quietly keeps producing output based on whatever was true when it was first configured — periodic review is the practical safeguard."}
   ],
   quiz:[
@@ -192,16 +249,21 @@ const DOMAINS_ASSOC = [
   intro:"Using Claude responsibly means knowing which tasks are actually appropriate to hand to it, respecting data sensitivity and privacy rules, following your organization's own AI policies, and thinking through the ethical dimension of how it's used.",
   sections:[
     {h:"Identifying appropriate vs. inappropriate use cases",
-     p:["Not every task is a good fit for Claude, even when it's technically CAPABLE of attempting it. Genuinely high-stakes decisions that require accountability tied to a specific human (final legal sign-off, certain HR/personnel decisions, safety-critical judgments) should keep a human clearly in the loop as the actual decision-maker, with Claude supporting that decision rather than replacing the human's accountability for it."],
+     p:["Not every task is a good fit for Claude, even when it's technically CAPABLE of attempting it. Genuinely high-stakes decisions that require accountability tied to a specific human (final legal sign-off, certain HR/personnel decisions, safety-critical judgments) should keep a human clearly in the loop as the actual decision-maker, with Claude supporting that decision rather than replacing the human's accountability for it.",
+        "**Appropriate uses:** Claude supports research, drafting, analysis, brainstorming — but not autonomous final decisions on high-stakes matters.",
+        "**Inappropriate uses:** Final medical diagnoses without doctor review, autonomous hiring/firing decisions, sole basis for legal determinations, safety-critical judgments with no human oversight"],
      why:"The line isn't 'can Claude technically produce an answer' — it's whether the DECISION genuinely needs human accountability attached to it, which is a different and more important question."},
     {h:"Data sensitivity, regulatory, and privacy considerations",
-     p:["Before sharing information with Claude — especially uploading documents or connecting live data sources — consider whether that information includes REGULATED or SENSITIVE data: personal identifying information, financial account details, health information, or anything your organization's policy specifically restricts. Where the actual analysis doesn't need the sensitive fields themselves (names, account numbers), removing or anonymizing them before sharing lets the useful work proceed without exposing what didn't need to be exposed."],
+     p:["Before sharing information with Claude — especially uploading documents or connecting live data sources — consider whether that information includes REGULATED or SENSITIVE data: personal identifying information, financial account details, health information, or anything your organization's policy specifically restricts. Where the actual analysis doesn't need the sensitive fields themselves (names, account numbers), removing or anonymizing them before sharing lets the useful work proceed without exposing what didn't need to be exposed.",
+        "**Sensitivity checklist:** Is this personally identifiable? Financial data? Health information? Proprietary business secrets? Restricted by policy? If yes to any, anonymize before sharing."],
      why:"This is a recurring, directly-tested scenario: uploading a full customer dataset when your organization restricts sharing regulated personal data is a policy violation, even with good intentions — anonymizing the sensitive fields first is the correct middle path between 'skip the task entirely' and 'ignore the policy.'"},
     {h:"Following organizational AI policies and governance standards",
-     p:["Most organizations have their own specific rules about acceptable AI use — which tools are approved, what data can be shared, what needs a disclosure or review step. These policies exist independently of what Claude itself is technically capable of, and following them is a professional responsibility distinct from technical skill."],
+     p:["Most organizations have their own specific rules about acceptable AI use — which tools are approved, what data can be shared, what needs a disclosure or review step. These policies exist independently of what Claude itself is technically capable of, and following them is a professional responsibility distinct from technical skill.",
+        "**Policy compliance mindset:** Your organization's policy is the standard, not your personal judgment. When in doubt, check the policy or ask leadership."],
      why:"An individual's personal judgment about what 'seems fine' to share or automate doesn't substitute for the organization's actual, agreed-upon policy — governance standards exist precisely because individual judgment varies and the organization has decided on a consistent standard."},
     {h:"Understanding the ethical implications of AI usage",
-     p:["Beyond formal policy compliance, there's a broader ethical dimension: whether a given use of AI is fair to the people it affects (a hiring-related use that could introduce or amplify bias), transparent (are people aware AI was involved in producing something they're receiving), and honestly represented (not passing off AI-assisted work as something it isn't when that distinction matters)."],
+     p:["Beyond formal policy compliance, there's a broader ethical dimension: whether a given use of AI is fair to the people it affects (a hiring-related use that could introduce or amplify bias), transparent (are people aware AI was involved in producing something they're receiving), and honestly represented (not passing off AI-assisted work as something it isn't when that distinction matters).",
+        "**Ethical questions to ask:** Who is this affecting and is it fair? Are they aware AI was involved? Am I being honest about the tool's role? Could this introduce or amplify bias?"],
      why:"Ethical use goes beyond 'is this technically allowed by policy' — it's a genuine judgment call about fairness and honesty that policy alone doesn't fully cover, and the exam expects you to recognize this as a distinct consideration from pure compliance."}
   ],
   quiz:[
@@ -216,7 +278,13 @@ const DOMAINS_ASSOC = [
      correct:1, explain:"Following the organization's actual agreed-upon policy is a professional responsibility distinct from whatever an individual might personally judge to be acceptable in the moment."},
     {q:"What's an example of an ETHICAL consideration in AI use that goes beyond simple policy compliance?",
      opts:["Whether the output uses correct grammar","Whether an AI-assisted use case is fair to the people it affects (e.g., risk of bias in a hiring-related use) and transparently disclosed when that matters","Whether the response was generated quickly enough","Whether the output was formatted as a bulleted list or plain prose"],
-     correct:1, explain:"Fairness and honest disclosure are genuine ethical judgment calls distinct from pure policy compliance — an organization's policy may not explicitly cover every fairness or transparency question that still matters."}
+     correct:1, explain:"Fairness and honest disclosure are genuine ethical judgment calls distinct from pure policy compliance — an organization's policy may not explicitly cover every fairness or transparency question that still matters."},
+    {q:"Your organization uses Claude to help shortlist job candidates. Several candidates from underrepresented groups consistently get lower scores. What kind of issue is this?",
+     opts:["Just a technical glitch, not a governance concern","A governance AND ethical issue — bias in hiring affects real people's opportunities, and there may be ethical and legal implications beyond the organization's internal policy","Only a technical issue, no governance involved","This is actually desired behavior and shouldn't be questioned"],
+     correct:1, explain:"Bias affecting hiring outcomes is both a governance issue (policy compliance) and an ethical issue (fairness to people affected) — these are distinct concerns requiring different fixes."},
+    {q:"You need to analyze customer feedback to identify common complaints, but feedback includes names, email addresses, and account IDs. What's the appropriate approach?",
+     opts:["Upload everything as-is since you only want to analyze complaints anyway","Redact the names, emails, and account IDs before uploading — the analysis doesn't need personally identifiable info, and this keeps you compliant with data protection practices","Skip the analysis entirely rather than uploading any customer data","Upload it secretly without telling leadership"],
+     correct:1, explain:"Removing personally identifiable information before sharing lets you do the analysis without creating unnecessary data exposure — balancing useful work with responsible data handling."}
   ]
 },
 {
@@ -224,13 +292,23 @@ const DOMAINS_ASSOC = [
   intro:"When a prompt isn't working, knowing how to diagnose WHY — and adjust deliberately rather than guessing — is what separates someone who gives up on a tool versus someone who gets consistently good results from it.",
   sections:[
     {h:"Diagnosing why a prompt underperforms",
-     p:["When output isn't meeting expectations, work through the likely causes systematically rather than guessing: is the INSTRUCTION itself ambiguous (could reasonably be interpreted multiple ways)? Is necessary CONTEXT missing (Claude doesn't know something it would need to know to answer well)? Is the FORMAT unclear (you wanted a table but never said so)? Each of these has a different, specific fix, so correctly identifying which one is actually the problem matters."],
+     p:["When output isn't meeting expectations, work through the likely causes systematically rather than guessing: is the INSTRUCTION itself ambiguous (could reasonably be interpreted multiple ways)? Is necessary CONTEXT missing (Claude doesn't know something it would need to know to answer well)? Is the FORMAT unclear (you wanted a table but never said so)? Each of these has a different, specific fix, so correctly identifying which one is actually the problem matters.",
+        "**Diagnosis framework:**",
+        "1. Ambiguous instruction? → Clarify or show an example",
+        "2. Missing context? → Add the information Claude needs",
+        "3. Unclear format? → Specify exactly how you want the output structured",
+        "4. Wrong model tier? → Try a more capable model",
+        "5. Accumulated context bloat? → Start fresh with a summary"],
      why:"Reflexively blaming 'the AI just isn't good at this' without first checking whether the prompt itself was clear, complete, and specific skips the most common and most fixable root cause."},
     {h:"Adjusting approach based on feedback and results",
-     p:["If output is consistently good on straightforward requests but weak specifically on ambiguous or judgment-heavy ones, that's useful diagnostic information — it suggests adding concrete examples or more explicit criteria for exactly those harder cases, rather than assuming a blanket fix (like 'write longer prompts everywhere') is needed across the board."],
+     p:["If output is consistently good on straightforward requests but weak specifically on ambiguous or judgment-heavy ones, that's useful diagnostic information — it suggests adding concrete examples or more explicit criteria for exactly those harder cases, rather than assuming a blanket fix (like 'write longer prompts everywhere') is needed across the board.",
+        "**Targeted vs. blanket fixes:**",
+        "Blanket fix (inefficient): 'Make all prompts longer' → actually makes many prompts worse",
+        "Targeted fix (efficient): 'When the task is ambiguous, add a concrete example showing what you want'"],
      why:"Targeted adjustment based on WHERE specifically the output falls short is more effective than an undifferentiated 'try harder' change applied uniformly to every future prompt."},
     {h:"Optimizing workflows for efficiency and effectiveness",
-     p:["Beyond fixing an individual broken prompt, look for RECURRING patterns worth solving once: if the same kind of request gets made repeatedly (weekly status summaries, a standard email template, a recurring analysis format), it's worth investing in a reusable, well-tuned prompt or Project setup ONCE, rather than re-solving the same prompting problem from scratch every single time it comes up."],
+     p:["Beyond fixing an individual broken prompt, look for RECURRING patterns worth solving once: if the same kind of request gets made repeatedly (weekly status summaries, a standard email template, a recurring analysis format), it's worth investing in a reusable, well-tuned prompt or Project setup ONCE, rather than re-solving the same prompting problem from scratch every single time it comes up.",
+        "**Optimization ROI:** A weekly recurring task is worth 30 minutes of setup investment. A one-time task probably isn't. Scale your setup effort to the time savings."],
      why:"This is the efficiency half of the domain — recognizing when a one-off fix isn't the right level of investment, and a durable, reusable setup pays for itself across many future uses instead."}
   ],
   quiz:[
@@ -242,7 +320,10 @@ const DOMAINS_ASSOC = [
      correct:1, explain:"Targeting the fix at the specific category where output actually falls short is more effective than an undifferentiated change applied everywhere."},
     {q:"A specific type of request (e.g., a weekly status summary) comes up every single week, and each time it's re-prompted from scratch. What's the more efficient approach?",
      opts:["Continue re-solving the same prompting problem from scratch each week, since every week's data is technically different","Invest once in a reusable, well-tuned prompt or Project setup for that recurring request type, so it doesn't need to be re-solved from scratch every time it comes up","Recurring requests can never be made more efficient than one-off ones","Use a completely different tool for every recurring task to keep things varied"],
-     correct:1, explain:"A recurring request pattern is exactly the case where investing once in a reusable, well-tuned setup pays off across every future instance, rather than repeating the same prompting work indefinitely."}
+     correct:1, explain:"A recurring request pattern is exactly the case where investing once in a reusable, well-tuned setup pays off across every future instance, rather than repeating the same prompting work indefinitely."},
+    {q:"You've been trying the same prompt multiple times and the output keeps being wrong in the same way. What does this signal?",
+     opts:["You should try the same prompt 10 more times, eventually it will work","The prompt instruction itself is probably ambiguous — just re-running it won't fix what the original instruction didn't clarify, but adding a concrete example of what you want usually does","Each AI response is completely independent, so this pattern means nothing","You should immediately switch to human-only workflows"],
+     correct:1, explain:"Repeated identical failures point to an ambiguous or incomplete instruction, not model incapacity — the fix is clarifying the instruction or showing an example, not re-running the same unclear prompt."}
   ]
 }
 ];

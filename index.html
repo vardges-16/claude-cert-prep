@@ -134,6 +134,35 @@ table.ref th{background:var(--paper);}
   #content{padding:24px 18px 80px;}
   .stat-grid{grid-template-columns:1fr;}
 }
+
+.part-banner{margin:34px 0 16px;padding:18px 22px;background:var(--arch-accent-soft);border-left:5px solid var(--arch-accent);border-radius:0 12px 12px 0}
+.part-kicker{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--arch-accent);font-weight:700}
+.part-title{font-family:var(--serif);font-size:1.3rem;margin:2px 0 6px}
+.part-banner p{margin:0;line-height:1.65;font-size:.93rem;color:var(--ink-soft)}
+.card .bridge{font-size:.88rem;font-style:italic;color:var(--ink-soft);border-left:3px solid var(--accent);padding:2px 0 2px 12px;margin:0 0 14px}
+figure.diagram{margin:16px 0;padding:10px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.roadmap-wrap{margin:0 0 24px}
+.outline{margin:10px 0 0;padding-left:22px;line-height:1.9;font-size:.93rem}
+.outline a{color:var(--ink);text-decoration:none;border-bottom:1px dotted var(--ink-soft)}
+.outline span{color:var(--ink-soft)}
+
+.layer-strip{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin:0 0 12px;font-size:.68rem}
+.ls-label{text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);font-weight:700;margin-right:4px}
+.ls-seg{padding:2px 8px;border-radius:999px;background:var(--paper-2);color:var(--ink-soft);border:1px solid var(--line)}
+.ls-seg.on{background:var(--arch-accent);color:#fff;border-color:var(--arch-accent);font-weight:700}
+.case{background:var(--arch-accent-soft);border-left:4px solid var(--arch-accent);padding:14px 18px;border-radius:0 10px 10px 0;margin:14px 0;font-size:.94rem;line-height:1.7}
+.case b{color:var(--arch-accent);text-transform:uppercase;font-size:.68rem;letter-spacing:.06em;display:block;margin-bottom:4px}
+.xlinks{margin:16px 0 4px;display:grid;gap:6px}
+.xlink{font-size:.88rem;line-height:1.5}
+.xk{display:inline-block;min-width:78px;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--ink-soft)}
+.xlink.builds-on .xk{color:var(--good)} .xlink.leads-to .xk{color:var(--accent)}
+.xw{color:var(--ink-soft)}
+a.xref{color:var(--ink);font-weight:600;border-bottom:1px dotted var(--ink-soft);text-decoration:none;cursor:pointer}
+a.xref:hover{color:var(--arch-accent);border-bottom-color:var(--arch-accent)}
+.part-recap{margin:-6px 0 26px;padding:14px 20px;background:var(--paper-2);border:1px dashed var(--ink-soft);border-radius:12px;font-size:.93rem;line-height:1.7}
+.part-recap b,.plug-box b{display:block;text-transform:uppercase;letter-spacing:.07em;font-size:.68rem;color:var(--ink-soft);margin-bottom:4px}
+.plug-box{margin:26px 0;padding:18px 22px;background:var(--arch-accent-soft);border:1px solid var(--arch-accent);border-radius:14px;line-height:1.75;font-size:.95rem}
+.card.flash{box-shadow:0 0 0 3px var(--arch-accent)}
 </style>
 </head>
 <body>
@@ -172,6 +201,7 @@ table.ref th{background:var(--paper);}
 <script src="data/architect.js"></script>
 <script src="data/associate.js"></script>
 <script src="data/architect-professional.js"></script>
+<script src="js/diag.js"></script>
 <script src="js/engine.js"></script>
 </body>
 </html>

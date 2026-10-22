@@ -5,7 +5,7 @@ A self-contained, browser-based study app covering four Claude certification tra
 | Track | Exam code | Domains | Questions |
 |---|---|---|---|
 | Developer — Foundations | CCDV-F | 8 | 347 |
-| Architect — Foundations | CCAR-F | 5 | 174 |
+| Architect — Foundations | CCAR-F | 5 | 200 |
 | Associate — Foundations | CCAO-F | 7 | 33 |
 | Architect — Professional | CCAR-P | 7 | 35 |
 

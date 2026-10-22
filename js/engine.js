@@ -1,3 +1,18 @@
+/* Storage abstraction with fallback to localStorage */
+if(!window.storage){
+  window.storage = {
+    get: async (key, encrypt) => {
+      try{
+        const val = localStorage.getItem(key);
+        return val ? {value: val} : null;
+      }catch(e){ return null; }
+    },
+    set: async (key, val, encrypt) => {
+      try{ localStorage.setItem(key, val); return true; }catch(e){ return false; }
+    }
+  };
+}
+
 const TRACKS = {
   dev: { label:"Claude Certified Developer — Foundations", short:"CCDV-F", domains:DOMAINS_DEV,
          mockCounts:{d2:18,d5:9,d1:8,d6:6,d8:6,d7:4,d3:1,d4:1}, mockTotal:53, examMinutes:120, passPct:72 },
@@ -30,10 +45,16 @@ async function saveProgress(){
 function P(){ return progress[currentTrack]; }
 function T(){ return TRACKS[currentTrack]; }
 
+function secKey(d,s,i){ return d.id+':'+(s.id!==undefined ? s.id : i); }
+function migrateMarks(){
+  try{ Object.keys(TRACKS).forEach(t=>{ const rs=progress[t] && progress[t].readSections; if(!rs) return;
+    TRACKS[t].domains.forEach(d=>d.sections.forEach((s,i)=>{ if(s.id!==undefined && s.legacy!==undefined){
+      const nk=secKey(d,s,i), ok=d.id+':'+s.legacy; if(rs[ok] && rs[nk]===undefined) rs[nk]=true; } })); }); }catch(e){}
+}
 function domainProgress(d){
   const total = d.sections.length + 1;
   let done = 0;
-  d.sections.forEach((s,i)=>{ if(P().readSections[d.id+':'+i]) done++; });
+  d.sections.forEach((s,i)=>{ if(P().readSections[secKey(d,s,i)]) done++; });
   if((P().quizBest[d.id]||0) >= 70) done++;
   return {done, total, pct: Math.round((done/total)*100)};
 }
@@ -116,9 +137,40 @@ function renderHome(){
   document.querySelectorAll('.path-item').forEach(el=> el.onclick = ()=> navigate(el.dataset.route));
 }
 
+const ARCH_LAYERS = ['Prompt & API','Loop & wrapper','Tools & MCP','Control & config','Multi-agent','Context & reliability'];
+let SECTION_INDEX = null;
+function buildSectionIndex(){
+  SECTION_INDEX = {};
+  Object.keys(TRACKS).forEach(t=>TRACKS[t].domains.forEach(d=>d.sections.forEach(s=>{ if(s.id!==undefined) SECTION_INDEX[s.id] = {track:t, dom:d.id, h:s.h, domTitle:d.title}; })));
+}
+function shortTitle(h){ return String(h).replace(/^Deep dive: /,'').split(/ — |: /)[0]; }
+function linkTo(id){
+  if(!SECTION_INDEX) buildSectionIndex();
+  const r = SECTION_INDEX[id]; if(!r) return '';
+  return `<a href="#" class="xref" data-goto="${id}">${escapeHtml(shortTitle(r.h))}</a>`;
+}
+function fmt(x){
+  return String(x).replace(/`([^`\n]+)`/g,(m,c)=>'<code>'+c.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/\[\[([a-z0-9-]+)\]\]/g,(m,id)=>linkTo(id)||id);
+}
+function gotoSection(id){
+  if(!SECTION_INDEX) buildSectionIndex();
+  const r = SECTION_INDEX[id]; if(!r) return;
+  if(currentTrack!==r.track){ currentTrack = r.track; }
+  navigate(r.dom);
+  setTimeout(()=>{ const el = document.getElementById('sec-'+id); if(el){ el.scrollIntoView({block:'start'}); el.classList.add('flash'); setTimeout(()=>el.classList.remove('flash'),1600); } },30);
+}
+function layerStrip(n){
+  if(!n) return '';
+  return `<div class="layer-strip" title="Where this topic sits in the six-layer map of the refund agent"><span class="ls-label">You are here</span>${ARCH_LAYERS.map((l,i)=>`<span class="ls-seg ${i+1===n?'on':''}">${i+1} ${l}</span>`).join('')}</div>`;
+}
+function renderLinks(links){
+  if(!links||!links.length) return '';
+  const lab = {'builds-on':'Builds on','leads-to':'Leads to','related':'Related'};
+  return `<div class="xlinks">${links.map(l=>{ const a = linkTo(l.to); return a? `<div class="xlink ${l.dir}"><span class="xk">${lab[l.dir]||'See'}</span> ${a}<span class="xw"> — ${escapeHtml(l.why||'')}</span></div>`:''; }).join('')}</div>`;
+}
 function renderTable(t){
-  return `<table class="ref"><thead><tr>${t.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
-  <tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  return `<table class="ref"><thead><tr>${t.headers.map(h=>`<th>${fmt(h)}</th>`).join('')}</tr></thead>
+  <tbody>${t.rows.map(r=>`<tr>${r.map(c=>`<td>${fmt(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
 }
 function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -159,30 +211,54 @@ function renderLifecycle(d){
   </div>`;
 }
 
+function renderRoadmap(d){
+  if(!d.parts) return '';
+  const svg = d.roadmap && window.renderDiagram ? window.renderDiagram(d.roadmap,'rm-'+d.id) : '';
+  const outline = d.parts.map((pt,pi)=>`<li><a href="#" data-jump="part-${pt.id}"><b>${pt.title}</b></a><span> — ${d.sections.filter(x=>x.part===pt.id).length} topics</span></li>`).join('');
+  return `<div class="roadmap-wrap"><div class="lifecycle-label">How this domain is built, in reading order</div>${svg?`<figure class="diagram">${svg}</figure>`:''}<ol class="outline">${outline}</ol></div>`;
+}
 function renderDomain(d){
   const pillClass = currentTrack==='arch' ? 'weight-pill arch' : 'weight-pill';
   let html = `
-    <div class="${pillClass}">${d.weight} of the exam</div>
+    <div class="${pillClass}">${/%/.test(d.weight)? d.weight+' of the exam' : d.weight}</div>
     <h1 class="page-title">${d.emoji} ${d.title}</h1>
     <p class="subtitle">${d.intro}</p>
+    ${renderRoadmap(d)}
     ${renderLifecycle(d)}
   `;
+  let lastPart = null;
   d.sections.forEach((s,i)=>{
-    const key = d.id+':'+i;
+    const key = secKey(d,s,i);
     const isRead = !!P().readSections[key];
-    html += `<div class="card">
+    if(d.parts && s.part && s.part!==lastPart){
+      const pi = d.parts.findIndex(x=>x.id===s.part), pt = d.parts[pi];
+      if(pt) html += `<div class="part-banner" id="part-${pt.id}"><div class="part-kicker">Part ${pi+1} of ${d.parts.length}</div><div class="part-title">${pt.title}</div><p>${fmt(pt.intro)}</p></div>`;
+      lastPart = s.part;
+    }
+    html += `<div class="card" id="sec-${s.id||i}">
+      ${s.bridge?`<p class="bridge">${fmt(s.bridge)}</p>`:''}
+      ${layerStrip(s.layer)}
       <h2>${s.h}</h2>
-      ${(s.p||[]).map(par=>`<p>${par}</p>`).join('')}
+      ${(s.p||[]).map(par=>`<p>${fmt(par)}</p>`).join('')}
+      ${s.diagram&&window.renderDiagram?`<figure class="diagram">${window.renderDiagram(s.diagram,'g-'+d.id+'-'+(s.id||i))}</figure>`:''}
       ${s.table?renderTable(s.table):''}
-      ${s.analogy?`<div class="analogy"><b>Think of it like this</b>${s.analogy}</div>`:''}
-      ${s.why?`<div class="why"><b>Why it matters</b>${s.why}</div>`:''}
-      ${s.why2?`<div class="why"><b>Common mistake</b>${s.why2}</div>`:''}
-      ${s.deep?`<div class="deep"><b>Extra detail</b>${s.deep}</div>`:''}
+      ${s.analogy?`<div class="analogy"><b>Think of it like this</b>${fmt(s.analogy)}</div>`:''}
+      ${s.why?`<div class="why"><b>Why it matters</b>${fmt(s.why)}</div>`:''}
+      ${s.why2?`<div class="why"><b>Common mistake</b>${fmt(s.why2)}</div>`:''}
+      ${s.case?`<div class="case"><b>In our refund agent</b>${fmt(s.case)}</div>`:''}
+      ${s.deep?`<div class="deep"><b>Extra detail</b>${fmt(s.deep)}</div>`:''}
       ${s.code?`<h3>Example</h3><pre><code>${escapeHtml(s.code)}</code></pre>`:''}
-      ${s.codeExplain?`<p>${s.codeExplain}</p>`:''}
+      ${s.codeExplain?`<p>${fmt(s.codeExplain)}</p>`:''}
+      ${renderLinks(s.links)}
       <button class="mark-btn ${isRead?'done':''}" data-key="${key}">${isRead?'✓ Marked as understood':'Mark as understood'}</button>
     </div>`;
+    const nxt = d.sections[i+1];
+    if(d.parts && s.part && (!nxt || nxt.part!==s.part)){
+      const pt = d.parts.find(x=>x.id===s.part);
+      if(pt && pt.recap) html += `<div class="part-recap"><b>How this Part fits together</b>${fmt(pt.recap)}</div>`;
+    }
   });
+  if(d.plug) html += `<div class="plug-box"><b>How this domain plugs into the rest of the system</b>${fmt(d.plug)}</div>`;
   html += `<div class="card" id="quiz-card">
     <h2>Check your understanding</h2>
     <p style="margin-bottom:20px;">${d.quiz.length} questions. Answer them all, then see your score. 70%+ marks this topic's quiz complete.</p>
@@ -200,13 +276,25 @@ function renderDomain(d){
       renderSidebar();
     };
   });
+  document.querySelectorAll('[data-goto]').forEach(a=>a.onclick=e=>{ e.preventDefault(); gotoSection(a.dataset.goto); });
+  document.querySelectorAll('[data-jump]').forEach(a=>a.onclick=e=>{ e.preventDefault(); const el=document.getElementById(a.dataset.jump); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); });
   renderQuiz(d);
+}
+
+function shuffleOptions(q){
+  const order = q.opts.map((_,i)=>i);
+  for(let i=order.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [order[i],order[j]] = [order[j],order[i]];
+  }
+  return {...q, opts:order.map(i=>q.opts[i]), correct:order.indexOf(q.correct)};
 }
 
 function renderQuiz(d){
   const body = document.getElementById('quiz-body');
-  const answers = new Array(d.quiz.length).fill(null);
-  body.innerHTML = d.quiz.map((q,qi)=>`
+  const quizShuffled = d.quiz.map(shuffleOptions);
+  const answers = new Array(quizShuffled.length).fill(null);
+  body.innerHTML = quizShuffled.map((q,qi)=>`
     <div class="quiz-q" data-qi="${qi}">
       <p class="qtext">${qi+1}. ${q.q}</p>
       ${q.opts.map((o,oi)=>`<button class="opt" data-oi="${oi}">${o}</button>`).join('')}
@@ -214,7 +302,7 @@ function renderQuiz(d){
     </div>
   `).join('') + `<div id="quiz-result"></div>`;
 
-  d.quiz.forEach((q,qi)=>{
+  quizShuffled.forEach((q,qi)=>{
     const qEl = body.querySelector(`.quiz-q[data-qi="${qi}"]`);
     qEl.querySelectorAll('.opt').forEach(optBtn=>{
       optBtn.onclick = ()=>{
@@ -237,14 +325,14 @@ function renderQuiz(d){
 
   async function checkQuizDone(){
     if(answers.every(a=>a!==null)){
-      const correctCount = answers.filter((a,i)=>a===d.quiz[i].correct).length;
-      const pct = Math.round((correctCount/d.quiz.length)*100);
+      const correctCount = answers.filter((a,i)=>a===quizShuffled[i].correct).length;
+      const pct = Math.round((correctCount/quizShuffled.length)*100);
       P().quizBest[d.id] = Math.max(P().quizBest[d.id]||0, pct);
       await saveProgress();
       renderSidebar();
       document.getElementById('quiz-result').innerHTML = `
         <div class="quiz-summary">
-          <b>${correctCount} / ${d.quiz.length} correct (${pct}%)</b>
+          <b>${correctCount} / ${quizShuffled.length} correct (${pct}%)</b>
           ${pct>=70? "Nice — this topic's quiz is marked complete." : "Below 70% — consider re-reading the sections above, then retry."}
           <div style="margin-top:12px;"><button class="ghost-btn" id="retry-quiz">Retry quiz</button></div>
         </div>`;
@@ -266,7 +354,7 @@ function buildMockExam(){
     chosen = chosen.slice(0, need);
     pool = pool.concat(chosen);
   });
-  return pool.sort(()=>Math.random()-0.5);
+  return pool.sort(()=>Math.random()-0.5).map(shuffleOptions);
 }
 
 function renderMockIntro(){
@@ -376,6 +464,8 @@ async function finishMock(){
 /* ---------- init ---------- */
 (async function init(){
   await loadProgress();
+  buildSectionIndex();
+  migrateMarks();
   renderSidebar();
   navigate('home');
 })();
